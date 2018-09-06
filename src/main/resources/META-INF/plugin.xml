@@ -1,0 +1,24 @@
+<idea-plugin>
+    <id>com.natpryce.pottery.pottery-idea-plugin</id>
+    <name>Pottery</name>
+    <vendor email="sw@natpryce.com" url="http://natpryce.com">Nat Pryce</vendor>
+
+    <description><![CDATA[
+    A Pottery client for Idea.
+    ]]></description>
+
+    <depends>com.intellij.modules.lang</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Pottery"
+                    secondary="true"
+                    canCloseContents="false"
+                    icon="/pottery.png"
+                    anchor="bottom"
+                    factoryClass="com.natpryce.pottery.ideaplugin.PotteryPlugin"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+</idea-plugin>
