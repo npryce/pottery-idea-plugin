@@ -12,11 +12,15 @@ import com.intellij.ui.layout.CCFlags.push
 import com.intellij.ui.layout.verticalPanel
 import com.natpryce.pottery.ProjectHistory
 import com.natpryce.pottery.Sherd
+import com.natpryce.pottery.Span
+import com.natpryce.pottery.days
+import com.natpryce.pottery.map
 import org.jdesktop.swingx.JXMonthView
 import org.jdesktop.swingx.VerticalLayout
 import org.jdesktop.swingx.calendar.DateSelectionModel.SelectionMode.SINGLE_INTERVAL_SELECTION
 import java.time.Clock
 import java.time.Instant
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -43,8 +47,9 @@ class PotteryToolWindow(
                 showSherds(ev.selection)
             }
         }
-        addPropertyChangeListener { ev -> println(ev) }
-        addActionListener { ev -> println(ev) }
+        addPropertyChangeListener("firstDisplayedDay") { ev ->
+            highlightDaysWithSherds(firstDisplayedDay, lastDisplayedDay)
+        }
     }
     
     private val sherdsPanel = JPanel(VerticalLayout())
@@ -60,15 +65,7 @@ class PotteryToolWindow(
         showSherds(selection.map { it.toDayTimespan() })
     }
     
-    private fun Date.toDayTimespan(): ClosedRange<Instant> {
-        val day = OffsetDateTime.ofInstant(toInstant(), ZoneId.systemDefault()).toLocalDate()
-        val startOfDay = day.atStartOfDay(ZoneId.systemDefault())
-        val endOfDay = startOfDay.plusDays(1).minusNanos(1)
-        
-        return startOfDay.toInstant()..endOfDay.toInstant()
-    }
-    
-    private fun showSherds(days: List<ClosedRange<Instant>>) {
+    private fun showSherds(days: List<Span<Instant>>) {
         sherdsPanel.removeAll()
         days.flatMap { history.sherds(it) }
             .sortedBy { it.file }
@@ -96,4 +93,27 @@ class PotteryToolWindow(
             }
         }
     }
+    
+    private fun highlightDaysWithSherds(firstDisplayedDay: Date, lastDisplayedDay: Date) {
+        val firstDate = firstDisplayedDay.toLocalDate()
+        val endDate = lastDisplayedDay.toLocalDate().plusDays(1)
+        
+        Span(firstDate, endDate).days()
+            .filter { day -> history.hasSherdsWithin(day.timespan()) }
+            .map { day -> Date.from(day.atStartOfDay(ZoneId.systemDefault()).toInstant()) }
+            .let { monthView.setFlaggedDates(*it.toTypedArray()) }
+    }
 }
+
+private fun Date.toLocalDate(): LocalDate =
+    OffsetDateTime.ofInstant(toInstant(), ZoneId.systemDefault()).toLocalDate()
+
+private fun Date.toDayTimespan(): Span<Instant> {
+    return toLocalDate().timespan()
+}
+
+private fun LocalDate.timespan(): Span<Instant> {
+    return let { Span(it, it.plusDays(1)) }
+        .map { it.atStartOfDay(ZoneId.systemDefault()).toInstant() }
+}
+

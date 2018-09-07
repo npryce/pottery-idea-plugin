@@ -11,7 +11,6 @@ import java.util.Locale
 import java.util.Random
 
 
-
 private fun Random.sherdId() =
     ByteArray(12)
         .also { nextBytes(it) }
@@ -26,10 +25,6 @@ val yearMonthDirectoryFormat = timeFormat("yyyy-MM")
 fun sherdPath(time: Instant, type: String, uid: String) =
     "${yearDirectoryFormat.format(time)}/${yearMonthDirectoryFormat.format(time)}${time}_${type}_${uid}.md"
 
-
-fun <T : Comparable<T>, U : Comparable<U>> ClosedRange<T>.map(f: (T) -> U) = f(start)..f(endInclusive)
-
-
 class ProjectHistory(
     private val projectDir: () -> File,
     private val random: Random = SecureRandom.getInstanceStrong()
@@ -39,15 +34,22 @@ class ProjectHistory(
             .writeText(content, Charset.defaultCharset())
     }
     
-    fun sherds(timespan: ClosedRange<Instant>): List<Sherd> {
-        val sherdTimestampRange = timespan.map { it.toString() }
+    fun hasSherdsWithin(timespan: Span<Instant>): Boolean =
+        sherdFilesWithin(timespan).any()
     
+    fun sherds(timespan: Span<Instant>): List<Sherd> {
+        return sherdFilesWithin(timespan)
+            .map { sherdFromFile(it) }
+            .toList()
+    }
+    
+    private fun sherdFilesWithin(timespan: Span<Instant>): Sequence<File> {
+        val sherdTimestampRange = timespan.map { it.toString() }
+        
         return projectHistoryDir().listDirs().asSequence()
             .flatMap { yearDir -> yearDir.listDirs().asSequence() }
             .flatMap { monthDir -> monthDir.listFiles().asSequence() }
             .filter { it.name.substringBefore('_') in sherdTimestampRange }
-            .map { sherdFromFile(it) }
-            .toList()
     }
     
     private fun sherdFromFile(sherdFile: File): Sherd {
@@ -66,5 +68,3 @@ class ProjectHistory(
             ?: File(projectDir, "docs/project-history")
     }
 }
-
-
