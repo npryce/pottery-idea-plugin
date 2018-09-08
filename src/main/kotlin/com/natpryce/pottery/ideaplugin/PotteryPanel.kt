@@ -34,13 +34,14 @@ import java.time.format.FormatStyle.LONG
 import java.util.Date
 import java.util.SortedSet
 import javax.swing.Box
+import javax.swing.BoxLayout
 import javax.swing.JPanel
 
 class PotteryPanel(
     private val project: Project,
     private val history: ProjectHistory,
     private val clock: Clock
-) : JBSplitter(), Disposable {
+) : Box(BoxLayout.Y_AXIS), Disposable {
     
     private val monthView = JXMonthView().apply {
         alignmentX = 0f
@@ -63,15 +64,16 @@ class PotteryPanel(
     private val fileListener = HistoryRefresher(history, ::refresh)
     
     init {
-        firstComponent = monthView
-        secondComponent = JBScrollPane(sherdsPanel)
-        setProportion(0.0f)
+        add(JBSplitter().apply {
+            firstComponent = monthView
+            secondComponent = JBScrollPane(sherdsPanel)
+            setProportion(0.0f)
+        })
         refresh()
         LocalFileSystem.getInstance().addVirtualFileListener(fileListener)
     }
     
     override fun dispose() {
-        super.dispose()
         LocalFileSystem.getInstance().removeVirtualFileListener(fileListener)
     }
     

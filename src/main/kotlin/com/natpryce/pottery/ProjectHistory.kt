@@ -23,7 +23,7 @@ private val yearDirectoryFormat = timeFormat("yyyy")
 private val yearMonthDirectoryFormat = timeFormat("yyyy-MM")
 
 private fun sherdPath(time: Instant, type: String, uid: String) =
-    "${yearDirectoryFormat.format(time)}/${yearMonthDirectoryFormat.format(time)}${time}_${type}_${uid}.md"
+    "${yearDirectoryFormat.format(time)}/${yearMonthDirectoryFormat.format(time)}/${time}_${type}_${uid}.md"
 
 class ProjectHistory(
     private val projectDir: () -> File,
