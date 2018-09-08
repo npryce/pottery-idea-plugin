@@ -19,10 +19,10 @@ private fun Random.sherdId() =
 private fun timeFormat(pattern: String): DateTimeFormatter =
     DateTimeFormatter.ofPattern(pattern, Locale.ROOT).withZone(ZoneOffset.UTC)
 
-val yearDirectoryFormat = timeFormat("yyyy")
-val yearMonthDirectoryFormat = timeFormat("yyyy-MM")
+private val yearDirectoryFormat = timeFormat("yyyy")
+private val yearMonthDirectoryFormat = timeFormat("yyyy-MM")
 
-fun sherdPath(time: Instant, type: String, uid: String) =
+private fun sherdPath(time: Instant, type: String, uid: String) =
     "${yearDirectoryFormat.format(time)}/${yearMonthDirectoryFormat.format(time)}${time}_${type}_${uid}.md"
 
 class ProjectHistory(
@@ -38,15 +38,13 @@ class ProjectHistory(
     fun hasSherdsWithin(timespan: Span<Instant>): Boolean =
         sherdFilesWithin(timespan).any()
     
-    fun sherds(timespan: Span<Instant>): List<Sherd> {
-        return sherdFilesWithin(timespan)
+    fun sherds(timespan: Span<Instant>) =
+        sherdFilesWithin(timespan)
             .map { sherdFromFile(it) }
             .toList()
-    }
     
-    fun containsFile(path: String): Boolean {
-        return true
-    }
+    fun containsFile(path: String) =
+        File(path).startsWith(projectHistoryDir())
     
     private fun sherdFilesWithin(timespan: Span<Instant>): Sequence<File> {
         val sherdTimestampRange = timespan.map { it.toString() }
