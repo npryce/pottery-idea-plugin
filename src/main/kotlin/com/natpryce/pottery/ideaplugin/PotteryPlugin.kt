@@ -15,10 +15,8 @@ class PotteryPlugin : ToolWindowFactory, DumbAware {
     
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val history = ProjectHistory(projectDir = { File(project.basePath) })
-        
-        toolWindow.contentManager.addContent(SERVICE.getInstance().createContent(
-            PotteryToolWindow(project, history, clock),
-            "",
-            false))
+    
+        val potteryPanel = PotteryPanel(project, history, clock)
+        toolWindow.contentManager.addContent(SERVICE.getInstance().createContent(potteryPanel, "", false))
     }
 }

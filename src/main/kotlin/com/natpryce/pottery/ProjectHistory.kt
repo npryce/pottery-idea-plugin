@@ -31,6 +31,7 @@ class ProjectHistory(
 ) {
     fun post(time: Instant, type: String, content: String) {
         File(projectHistoryDir(), sherdPath(time, type, random.sherdId()))
+            .apply { parentFile.mkdirs() }
             .writeText(content, Charset.defaultCharset())
     }
     
@@ -41,6 +42,10 @@ class ProjectHistory(
         return sherdFilesWithin(timespan)
             .map { sherdFromFile(it) }
             .toList()
+    }
+    
+    fun containsFile(path: String): Boolean {
+        return true
     }
     
     private fun sherdFilesWithin(timespan: Span<Instant>): Sequence<File> {
