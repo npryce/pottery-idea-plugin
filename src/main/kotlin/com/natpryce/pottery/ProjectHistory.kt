@@ -1,7 +1,6 @@
 package com.natpryce.pottery
 
-import java.io.File
-import java.nio.charset.Charset
+import java.nio.file.Path
 import java.security.SecureRandom
 import java.time.Instant
 import java.time.ZoneOffset
@@ -25,14 +24,14 @@ private val yearMonthDirectoryFormat = timeFormat("yyyy-MM")
 private fun sherdPath(time: Instant, type: String, uid: String) =
     "${yearDirectoryFormat.format(time)}/${yearMonthDirectoryFormat.format(time)}/${time}_${type}_${uid}.md"
 
+
 class ProjectHistory(
-    private val projectDir: () -> File,
+    private val projectDir: () -> Path,
+    private val storage: ProjectHistoryStorage,
     private val random: Random = SecureRandom.getInstanceStrong()
 ) {
     fun post(time: Instant, type: String, content: String) {
-        File(projectHistoryDir(), sherdPath(time, type, random.sherdId()))
-            .apply { parentFile.mkdirs() }
-            .writeText(content, Charset.defaultCharset())
+        storage.writeText(projectHistoryDir().resolve(sherdPath(time, type, random.sherdId())), content)
     }
     
     fun hasSherdsWithin(timespan: Span<Instant>): Boolean =
@@ -43,31 +42,35 @@ class ProjectHistory(
             .map { sherdFromFile(it) }
             .toList()
     
-    fun containsFile(path: String) =
-        File(path).startsWith(projectHistoryDir())
+    fun containsFile(path: Path) =
+        path.startsWith(projectHistoryDir())
     
-    private fun sherdFilesWithin(timespan: Span<Instant>): Sequence<File> {
+    private fun sherdFilesWithin(timespan: Span<Instant>): Sequence<Path> {
         val sherdTimestampRange = timespan.map { it.toString() }
         
-        return projectHistoryDir().listDirs().asSequence()
-            .flatMap { yearDir -> yearDir.listDirs().asSequence() }
+        return projectHistoryDir().listDirs()
+            .flatMap { yearDir -> yearDir.listDirs() }
             .flatMap { monthDir -> monthDir.listFiles().asSequence() }
-            .filter { it.name.substringBefore('_') in sherdTimestampRange }
+            .filter { it.fileName.toString().substringBefore('_') in sherdTimestampRange }
     }
     
-    private fun sherdFromFile(sherdFile: File): Sherd {
-        val (timeStr, type, uid) = sherdFile.name.split('_', limit = 3)
+    private fun Path.listDirs(): Sequence<Path> =
+        storage.list(this).filter { storage.isDir(it) }.asSequence()
+    
+    private fun Path.listFiles(): Sequence<Path> =
+        storage.list(this).filterNot { storage.isDir(it) }.asSequence()
+    
+    private fun sherdFromFile(sherdFile: Path): Sherd {
+        val (timeStr, type, uid) = sherdFile.fileName.toString().split('_', limit = 3)
         val time = Instant.parse(timeStr)
         
         return Sherd(type = type, timestamp = time, uid = uid, file = sherdFile)
     }
     
-    private fun projectHistoryDir(): File {
+    private fun projectHistoryDir(): Path {
         val projectDir = projectDir()
-        return File(projectDir, ".project-history-dir")
-            .takeIf { it.exists() }
-            ?.let { File(projectDir, it.readPlatformText().trim()) }
-            ?.takeIf { it.exists() }
-            ?: File(projectDir, "docs/project-history")
+        return projectDir.resolve(".project-history-dir")
+            .let { storage.readText(it) }
+            .let { projectDir.resolve(it?.trim() ?: "docs/project-history") }
     }
 }

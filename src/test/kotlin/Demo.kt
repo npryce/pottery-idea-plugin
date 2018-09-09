@@ -1,10 +1,11 @@
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl
+import com.natpryce.pottery.JavaFileProjectHistoryStorage
 import com.natpryce.pottery.ProjectHistory
 import com.natpryce.pottery.ideaplugin.PotteryPanel
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
-import java.io.File
+import java.nio.file.Paths
 import java.time.Clock
 import javax.swing.JFrame
 
@@ -20,7 +21,7 @@ fun main(args: Array<String>) {
     
     val project = fixture.project
     
-    val history = ProjectHistory(projectDir = { File(project.basePath) })
+    val history = ProjectHistory(projectDir = { Paths.get(project.basePath) }, storage = JavaFileProjectHistoryStorage())
     val clock = Clock.systemDefaultZone()
     
     history.post(clock.instant(), "post", "First post!")
