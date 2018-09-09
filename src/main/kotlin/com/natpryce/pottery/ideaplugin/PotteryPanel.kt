@@ -44,7 +44,6 @@ class PotteryPanel(
         isTraversable = true
         selectionMode = SINGLE_INTERVAL_SELECTION
         selectionModel.addDateSelectionListener { ev ->
-            println(ev)
             if (!ev.isAdjusting) {
                 showSherds(ev.selection)
             }
@@ -94,7 +93,7 @@ class PotteryPanel(
     }
     
     private fun sherdPane(sherd: Sherd) = verticalPanel {
-        val sherdVirtualFile = LocalFileSystem.getInstance().findFileByPath(sherd.file.toString())
+        val sherdVirtualFile = project.baseDir.findFileByRelativePath(sherd.file.toString())
         
         if (sherdVirtualFile != null) {
             row(DateTimeFormatter.ofLocalizedDateTime(LONG).format(sherd.timestamp.atZone(ZoneId.systemDefault()))) {
