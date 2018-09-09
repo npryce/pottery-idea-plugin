@@ -1,6 +1,7 @@
 package com.natpryce.pottery
 
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.security.SecureRandom
 import java.time.Instant
 import java.time.ZoneOffset
@@ -26,7 +27,6 @@ private fun sherdPath(time: Instant, type: String, uid: String) =
 
 
 class ProjectHistory(
-    private val projectDir: () -> Path,
     private val storage: ProjectHistoryStorage,
     private val random: Random = SecureRandom.getInstanceStrong()
 ) {
@@ -68,9 +68,8 @@ class ProjectHistory(
     }
     
     private fun projectHistoryDir(): Path {
-        val projectDir = projectDir()
-        return projectDir.resolve(".project-history-dir")
-            .let { storage.readText(it) }
-            .let { projectDir.resolve(it?.trim() ?: "docs/project-history") }
+        return storage.readText(Paths.get(".project-history-dir"))
+            ?.let { Paths.get(it.trim()) }
+            ?: Paths.get("docs", "project-history")
     }
 }

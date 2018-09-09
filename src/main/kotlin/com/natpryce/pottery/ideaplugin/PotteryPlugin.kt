@@ -7,7 +7,7 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.openapi.wm.ex.ToolWindowEx
 import com.intellij.ui.content.ContentFactory.SERVICE
-import com.natpryce.pottery.JavaFileProjectHistoryStorage
+import com.natpryce.pottery.JavaIoProjectHistoryStorage
 import com.natpryce.pottery.ProjectHistory
 import java.nio.file.Paths
 import java.time.Clock
@@ -17,7 +17,7 @@ class PotteryPlugin : ToolWindowFactory, DumbAware {
     val clock = Clock.systemDefaultZone()
     
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val history = ProjectHistory(projectDir = { Paths.get(project.basePath) }, storage = JavaFileProjectHistoryStorage())
+        val history = ProjectHistory(JavaIoProjectHistoryStorage({ Paths.get(project.basePath) }))
         
         val potteryPanel = PotteryPanel(project, history, clock)
         toolWindow.contentManager.addContent(SERVICE.getInstance().createContent(potteryPanel, "", false))

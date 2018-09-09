@@ -5,26 +5,28 @@ import java.io.FileNotFoundException
 import java.nio.charset.Charset
 import java.nio.file.Path
 
-class JavaFileProjectHistoryStorage : ProjectHistoryStorage {
+class JavaIoProjectHistoryStorage(private val projectDir: () -> Path) : ProjectHistoryStorage {
     override fun readText(path: Path) =
         try {
-            path.toFile().readText(Charset.defaultCharset())
+            fileAt(path).readText(Charset.defaultCharset())
         }
         catch (e: FileNotFoundException) {
             null
         }
     
     override fun writeText(path: Path, content: String) {
-        val file = path.toFile()
+        val file = fileAt(path)
         file.parentFile.mkdirs()
         path.write(content)
         file.writeText(content, Charset.defaultCharset())
     }
     
     override fun list(path: Path) =
-        path.toFile().listFiles().map { it.toPath() }
+        fileAt(path).listFiles().map { it.toPath() }
     
-    override fun isDir(path: Path): Boolean {
-        return path.toFile().isDirectory
-    }
+    override fun isDir(path: Path) =
+        fileAt(path).isDirectory
+    
+    private fun fileAt(path: Path) =
+        projectDir().resolve(path).toFile()
 }
