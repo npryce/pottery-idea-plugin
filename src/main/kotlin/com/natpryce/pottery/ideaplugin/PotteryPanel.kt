@@ -1,10 +1,8 @@
 package com.natpryce.pottery.ideaplugin
 
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileTypes.FileTypes.PLAIN_TEXT
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBScrollPane
@@ -36,11 +34,11 @@ class PotteryPanel(
     private val project: Project,
     private val history: ProjectHistory,
     private val clock: Clock
-) : Box(BoxLayout.Y_AXIS), Disposable {
+) : Box(BoxLayout.Y_AXIS) {
     
     private val monthView = JXMonthView().apply {
         alignmentX = 0f
-        alignmentY = 0.5f
+        alignmentY = 0f
         isTraversable = true
         selectionMode = SINGLE_INTERVAL_SELECTION
         selectionModel.addDateSelectionListener { ev ->
@@ -48,14 +46,13 @@ class PotteryPanel(
                 showSherds(ev.selection)
             }
         }
-        addPropertyChangeListener("firstDisplayedDay") { ev ->
+        addPropertyChangeListener("firstDisplayedDay") { _ ->
             highlightDaysWithSherds()
         }
     }
     
     private val sherdsPanel = JPanel(VerticalLayout())
     
-    private val fileListener = HistoryRefresher(history, ::refresh)
     
     init {
         add(JBSplitter().apply {
@@ -64,18 +61,13 @@ class PotteryPanel(
             setProportion(0.0f)
         })
         refresh()
-        LocalFileSystem.getInstance().addVirtualFileListener(fileListener)
-    }
-    
-    override fun dispose() {
-        LocalFileSystem.getInstance().removeVirtualFileListener(fileListener)
     }
     
     private fun showSherds(selection: SortedSet<Date>) {
         showSherds(selection.map { it.toDayTimespan() })
     }
     
-    private fun refresh() {
+    fun refresh() {
         highlightDaysWithSherds()
         showSherds(monthView.selection)
     }

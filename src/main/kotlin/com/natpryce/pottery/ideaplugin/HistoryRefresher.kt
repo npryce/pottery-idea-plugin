@@ -1,40 +1,41 @@
 package com.natpryce.pottery.ideaplugin
 
-import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.vfs.VirtualFileCopyEvent
-import com.intellij.openapi.vfs.VirtualFileEvent
-import com.intellij.openapi.vfs.VirtualFileListener
-import com.intellij.openapi.vfs.VirtualFileMoveEvent
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.newvfs.BulkFileListener
+import com.intellij.openapi.vfs.newvfs.events.VFileCopyEvent
+import com.intellij.openapi.vfs.newvfs.events.VFileCreateEvent
+import com.intellij.openapi.vfs.newvfs.events.VFileDeleteEvent
+import com.intellij.openapi.vfs.newvfs.events.VFileEvent
+import com.intellij.openapi.vfs.newvfs.events.VFileMoveEvent
 import com.natpryce.pottery.ProjectHistory
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class HistoryRefresher(
+    private val project: Project,
     private val history: ProjectHistory,
     private val refresh: ()->Unit
-) : VirtualFileListener {
-    override fun fileCreated(event: VirtualFileEvent) {
-        refreshIf(history.containsFile(event.file))
+) : BulkFileListener {
+    
+    override fun after(events: List<VFileEvent>) {
+        refreshIf(
+            events.flatMap { it.affectedPaths() }.any { history.containsFile(it) })
     }
-
-    override fun fileCopied(event: VirtualFileCopyEvent) {
-        refreshIf(history.containsFile(event.file))
+    
+    private fun VFileEvent.affectedPaths(): List<Path> {
+        val baseDir = Paths.get(project.basePath)
+        return when (this) {
+            is VFileCreateEvent -> listOf(path)
+            is VFileDeleteEvent -> listOf(path)
+            is VFileMoveEvent -> listOf(oldPath, path)
+            is VFileCopyEvent -> listOf(newParent.findChild(newChildName)?.path)
+            else -> emptyList()
+        }.filterNotNull().map { baseDir.relativize(Paths.get(it)) }
     }
-
-    override fun fileMoved(event: VirtualFileMoveEvent) {
-        refreshIf(history.containsFile(event.newParent) || history.containsFile(event.oldParent))
-    }
-
-    override fun fileDeleted(event: VirtualFileEvent) {
-        refreshIf(history.containsFile(event.file))
-    }
-
-    fun refreshIf(refreshFlag: Boolean) {
+    
+    private fun refreshIf(refreshFlag: Boolean) {
         if (refreshFlag) {
             refresh()
         }
-    }
-
-    private fun ProjectHistory.containsFile(file: VirtualFile): Boolean {
-        return containsFile(Paths.get(file.path))
     }
 }
