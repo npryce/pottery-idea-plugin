@@ -21,9 +21,10 @@ private fun timeFormat(pattern: String): DateTimeFormatter =
 
 private val yearDirectoryFormat = timeFormat("yyyy")
 private val yearMonthDirectoryFormat = timeFormat("yyyy-MM")
+private val dateTimeFormat = timeFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
 private fun sherdPath(time: Instant, type: String, uid: String) =
-    "${yearDirectoryFormat.format(time)}/${yearMonthDirectoryFormat.format(time)}/${time}_${type}_${uid}.md"
+    "${yearDirectoryFormat.format(time)}/${yearMonthDirectoryFormat.format(time)}/${dateTimeFormat.format(time)}_${type}_${uid}.md"
 
 
 class ProjectHistory(
