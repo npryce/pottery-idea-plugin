@@ -28,13 +28,14 @@ class IdeaVfsProjectHistoryStorage(
         }
     }
     
-    override fun list(path: Path): List<Path> {
+    override fun list(path: Path): Set<Path> {
         val baseDir = project.baseDir
         val basePath = Paths.get(baseDir.path)
         
         return baseDir.findFileByRelativePath(path.toString())
             ?.children?.map { basePath.relativize(Paths.get(it.path)) }
-            ?: emptyList()
+            ?.toSortedSet()
+            ?: emptySet()
     }
     
     override fun isDir(path: Path) =

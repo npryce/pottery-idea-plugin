@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.natpryce.pottery'
-version '1.0.0-SNAPSHOT'
+version '1.0.0-RC1'
 
 repositories {
     mavenCentral()
@@ -12,6 +12,8 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    testCompile "junit:junit:4.12"
+    testCompile "com.natpryce:hamkrest:1.6.0.0"
 }
 
 compileKotlin {
