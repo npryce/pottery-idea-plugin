@@ -1,5 +1,9 @@
 package com.natpryce.pottery.ideaplugin
 
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.ActionPlaces.TOOLBAR
+import com.intellij.openapi.actionSystem.ActionToolbar
+import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileTypes.FileTypes.PLAIN_TEXT
 import com.intellij.openapi.project.Project
@@ -19,6 +23,8 @@ import org.jdesktop.swingx.JXMonthView
 import org.jdesktop.swingx.VerticalLayout
 import org.jdesktop.swingx.calendar.DateSelectionModel.SelectionMode.SINGLE_INTERVAL_SELECTION
 import java.awt.BorderLayout
+import java.awt.BorderLayout.CENTER
+import java.awt.BorderLayout.WEST
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
@@ -37,6 +43,11 @@ class PotteryPanel(
     private val clock: Clock
 ) : JPanel(BorderLayout()) {
     
+    private val actions =
+        DefaultActionGroup(
+            PostSherdAction(project, history, clock)
+        )
+    
     private val monthView = JXMonthView().apply {
         isTraversable = true
         selectionMode = SINGLE_INTERVAL_SELECTION
@@ -54,11 +65,18 @@ class PotteryPanel(
     private val sherdsPanel = JPanel(VerticalLayout())
     
     init {
+        ActionManager.getInstance().createActionToolbar(TOOLBAR, actions, false)
+            .apply {
+                layoutPolicy = ActionToolbar.AUTO_LAYOUT_POLICY
+                this.adjustTheSameSize(true)
+            }
+            .let { add(it.component, WEST) }
+        
         add(JBSplitter().apply {
             firstComponent = monthView
             secondComponent = JBScrollPane(sherdsPanel)
             setProportion(0.0f)
-        }, BorderLayout.CENTER)
+        }, CENTER)
         
         refresh()
     }
