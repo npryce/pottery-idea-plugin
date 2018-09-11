@@ -25,3 +25,8 @@ compileTestKotlin {
 intellij {
     version '2018.1.4'
 }
+
+publishPlugin {
+    username project.properties["jetbrains.username"]
+    password project.properties["jetbrains.password"]
+}
