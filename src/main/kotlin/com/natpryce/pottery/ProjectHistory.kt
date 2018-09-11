@@ -62,7 +62,7 @@ class ProjectHistory(
         storage.list(this).filterNot { storage.isDir(it) }.asSequence()
     
     private fun sherdFromFile(sherdFile: Path): Sherd {
-        val (timeStr, type, uid) = sherdFile.fileName.toString().split('_', limit = 3)
+        val (timeStr, type, uid) = sherdFile.fileName.toString().substringBefore('.').split('_', limit = 3)
         val time = Instant.parse(timeStr)
         
         return Sherd(type = type, timestamp = time, uid = uid, file = sherdFile)
