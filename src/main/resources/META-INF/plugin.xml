@@ -8,6 +8,8 @@
     See https://github.com/npryce/pottery.
     ]]></description>
 
+    <change-notes>Initial release.</change-notes>
+
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -18,7 +20,4 @@
                     anchor="bottom"
                     factoryClass="com.natpryce.pottery.ideaplugin.PotteryPlugin"/>
     </extensions>
-
-    <change-notes>
-    </change-notes>
 </idea-plugin>
