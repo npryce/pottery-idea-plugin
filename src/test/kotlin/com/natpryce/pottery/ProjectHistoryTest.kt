@@ -2,6 +2,9 @@ package com.natpryce.pottery
 
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import com.natpryce.hamkrest.isEmpty
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.Instant
 import java.util.Random
@@ -22,13 +25,24 @@ class ProjectHistoryTest {
         history.post(t("2018-08-14T09:00:00Z"), POST_TYPE, "some content")
         history.post(t("2018-08-14T10:00:00Z"), POST_TYPE, "more content")
         
-        val sherds = history.sherds(Span(Instant.parse("2018-08-14T00:00:00Z"), Instant.parse("2018-09-14T00:00:00Z")))
+        val timespan = Span(Instant.parse("2018-08-14T00:00:00Z"), Instant.parse("2018-09-14T00:00:00Z"))
         
-        assertThat(sherds, equalTo(listOf(
-            Sherd(type= POST_TYPE, timestamp = t("2018-08-14T09:00:00Z"), uid="AAAAAAAAAAAAAABh", history = history),
-            Sherd(type= POST_TYPE, timestamp = t("2018-08-14T10:00:00Z"), uid="AAAAAAAAAAAAAABi", history = history))
+        assertTrue(history.hasSherdsWithin(timespan))
+        assertThat(history.sherds(timespan), equalTo(
+            listOf(
+                Sherd(type = POST_TYPE, timestamp = t("2018-08-14T09:00:00Z"), uid = "AAAAAAAAAAAAAABh", history = history),
+                Sherd(type = POST_TYPE, timestamp = t("2018-08-14T10:00:00Z"), uid = "AAAAAAAAAAAAAABi", history = history))
         ))
     }
+    
+    @Test
+    fun `reading back period with no events`() {
+        val timespan = Span(Instant.parse("2018-08-14T00:00:00Z"), Instant.parse("2018-09-14T00:00:00Z"))
+        
+        assertFalse(history.hasSherdsWithin(timespan))
+        assertThat(history.sherds(timespan), isEmpty)
+    }
+    
     
     fun t(instantStr: String) = Instant.parse(instantStr)
 }

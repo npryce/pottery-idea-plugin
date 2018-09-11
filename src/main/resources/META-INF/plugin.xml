@@ -4,10 +4,11 @@
     <vendor email="sw@natpryce.com" url="http://natpryce.com">Nat Pryce</vendor>
 
     <description><![CDATA[
-    A Pottery client for Idea.
+    It's like Twitter, for recording things that happen in your project, stored in it's version control repository.
+    See https://github.com/npryce/pottery.
     ]]></description>
 
-    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Pottery"
@@ -18,7 +19,6 @@
                     factoryClass="com.natpryce.pottery.ideaplugin.PotteryPlugin"/>
     </extensions>
 
-    <actions>
-        <!-- Add your actions here -->
-    </actions>
+    <change-notes>
+    </change-notes>
 </idea-plugin>
