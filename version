@@ -1,0 +1,2 @@
+#!/bin/sh -e
+git describe --always --tags --match '*.*.*' --dirty="_patched"

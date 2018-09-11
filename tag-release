@@ -1,0 +1,10 @@
+#!/bin/sh -e
+version=$1
+
+if [ -z ${version} ]
+then
+    echo "ERROR no tag given; last tag:" `$(dirname $0)/last-release`
+    exit 1
+else
+    git tag -u sw@natpryce.com ${version} -m "tagging version ${version}"
+fi
