@@ -11,21 +11,13 @@ import java.util.Locale
 import java.util.Random
 
 
-private fun Random.sherdId() =
-    ByteArray(12)
-        .also { nextBytes(it) }
-        .let { Base64.getUrlEncoder().encodeToString(it) }
+const val POST_TYPE = "post"
 
-private fun timeFormat(pattern: String): DateTimeFormatter =
-    DateTimeFormatter.ofPattern(pattern, Locale.ROOT).withZone(ZoneOffset.UTC)
+data class Sherd(val type: String, val timestamp: Instant, val uid: String, val history: ProjectHistory) {
+    fun path(): Path = history.path(this)
+}
 
-private val yearDirectoryFormat = timeFormat("yyyy")
-private val yearMonthDirectoryFormat = timeFormat("yyyy-MM")
-private val dateTimeFormat = timeFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-
-private fun sherdPath(time: Instant, type: String, uid: String) =
-    "${yearDirectoryFormat.format(time)}/${yearMonthDirectoryFormat.format(time)}/${dateTimeFormat.format(time)}_${type}_${uid}.md"
-
+val timeOrder = compareBy(Sherd::timestamp, Sherd::type, Sherd::uid)
 
 class ProjectHistory(
     private val storage: ProjectHistoryStorage,
@@ -65,7 +57,7 @@ class ProjectHistory(
         val (timeStr, type, uid) = sherdFile.fileName.toString().substringBefore('.').split('_', limit = 3)
         val time = Instant.parse(timeStr)
         
-        return Sherd(type = type, timestamp = time, uid = uid, file = sherdFile)
+        return Sherd(type = type, timestamp = time, uid = uid, history = this)
     }
     
     private fun projectHistoryDir(): Path {
@@ -73,4 +65,23 @@ class ProjectHistory(
             ?.let { Paths.get(it.trim()) }
             ?: Paths.get("docs", "project-history")
     }
+    
+    internal fun path(sherd: Sherd) =
+        projectHistoryDir().resolve(sherdPath(sherd.timestamp, sherd.type, sherd.uid))
 }
+
+
+private fun Random.sherdId() =
+    ByteArray(12)
+        .also { nextBytes(it) }
+        .let { Base64.getUrlEncoder().encodeToString(it) }
+
+private fun timeFormat(pattern: String): DateTimeFormatter =
+    DateTimeFormatter.ofPattern(pattern, Locale.ROOT).withZone(ZoneOffset.UTC)
+
+private val yearDirectoryFormat = timeFormat("yyyy")
+private val yearMonthDirectoryFormat = timeFormat("yyyy-MM")
+private val dateTimeFormat = timeFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+
+private fun sherdPath(time: Instant, type: String, uid: String) =
+    "${yearDirectoryFormat.format(time)}/${yearMonthDirectoryFormat.format(time)}/${dateTimeFormat.format(time)}_${type}_${uid}.md"

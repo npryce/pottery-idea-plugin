@@ -14,9 +14,11 @@ import com.natpryce.pottery.Sherd
 import com.natpryce.pottery.Span
 import com.natpryce.pottery.days
 import com.natpryce.pottery.map
+import com.natpryce.pottery.timeOrder
 import org.jdesktop.swingx.JXMonthView
 import org.jdesktop.swingx.VerticalLayout
 import org.jdesktop.swingx.calendar.DateSelectionModel.SelectionMode.SINGLE_INTERVAL_SELECTION
+import java.awt.BorderLayout
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
@@ -27,20 +29,18 @@ import java.time.format.FormatStyle.LONG
 import java.util.Date
 import java.util.SortedSet
 import javax.swing.Box
-import javax.swing.BoxLayout
 import javax.swing.JPanel
 
 class PotteryPanel(
     private val project: Project,
     private val history: ProjectHistory,
     private val clock: Clock
-) : Box(BoxLayout.Y_AXIS) {
+) : JPanel(BorderLayout()) {
     
     private val monthView = JXMonthView().apply {
-        alignmentX = 0f
-        alignmentY = 0f
         isTraversable = true
         selectionMode = SINGLE_INTERVAL_SELECTION
+        selectionDate = Date.from(clock.instant())
         selectionModel.addDateSelectionListener { ev ->
             if (!ev.isAdjusting) {
                 showSherds(ev.selection)
@@ -53,13 +53,13 @@ class PotteryPanel(
     
     private val sherdsPanel = JPanel(VerticalLayout())
     
-    
     init {
         add(JBSplitter().apply {
             firstComponent = monthView
             secondComponent = JBScrollPane(sherdsPanel)
             setProportion(0.0f)
-        })
+        }, BorderLayout.CENTER)
+        
         refresh()
     }
     
@@ -75,7 +75,7 @@ class PotteryPanel(
     private fun showSherds(days: List<Span<Instant>>) {
         sherdsPanel.removeAll()
         days.flatMap { history.sherds(it) }
-            .sortedBy { it.file }
+            .sortedWith(timeOrder)
             .forEachIndexed { i, sherd ->
                 if (i > 0) sherdsPanel.add(Box.createVerticalStrut(8))
                 sherdsPanel.add(sherdPane(sherd))
@@ -85,7 +85,7 @@ class PotteryPanel(
     }
     
     private fun sherdPane(sherd: Sherd) = verticalPanel {
-        val sherdVirtualFile = project.baseDir.findFileByRelativePath(sherd.file.toString())
+        val sherdVirtualFile = project.baseDir.findFileByRelativePath(sherd.path().toString())
         
         if (sherdVirtualFile != null) {
             row(DateTimeFormatter.ofLocalizedDateTime(LONG).format(sherd.timestamp.atZone(ZoneId.systemDefault()))) {
