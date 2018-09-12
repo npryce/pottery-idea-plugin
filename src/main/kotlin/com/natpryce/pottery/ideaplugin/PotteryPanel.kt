@@ -103,7 +103,7 @@ class PotteryPanel(
     }
     
     private fun sherdPane(sherd: Sherd) = verticalPanel {
-        val sherdVirtualFile = project.baseDir.findFileByRelativePath(sherd.path().toString())
+        val sherdVirtualFile = project.baseDir.findFileByRelativePath(history.path(sherd).toString())
         
         if (sherdVirtualFile != null) {
             row(DateTimeFormatter.ofLocalizedDateTime(LONG).format(sherd.timestamp.atZone(ZoneId.systemDefault()))) {

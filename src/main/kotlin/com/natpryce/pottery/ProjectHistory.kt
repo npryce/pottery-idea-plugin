@@ -13,9 +13,7 @@ import java.util.Random
 
 const val POST_TYPE = "post"
 
-data class Sherd(val type: String, val timestamp: Instant, val uid: String, val history: ProjectHistory) {
-    fun path(): Path = history.path(this)
-}
+data class Sherd(val type: String, val timestamp: Instant, val uid: String)
 
 val timeOrder = compareBy(Sherd::timestamp, Sherd::type, Sherd::uid)
 
@@ -57,7 +55,7 @@ class ProjectHistory(
         val (timeStr, type, uid) = sherdFile.fileName.toString().substringBefore('.').split('_', limit = 3)
         val time = Instant.parse(timeStr)
         
-        return Sherd(type = type, timestamp = time, uid = uid, history = this)
+        return Sherd(type = type, timestamp = time, uid = uid)
     }
     
     private fun projectHistoryDir(): Path {
@@ -66,7 +64,7 @@ class ProjectHistory(
             ?: Paths.get("docs", "project-history")
     }
     
-    internal fun path(sherd: Sherd) =
+    fun path(sherd: Sherd) =
         projectHistoryDir().resolve(sherdPath(sherd.timestamp, sherd.type, sherd.uid))
 }
 

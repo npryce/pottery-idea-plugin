@@ -11,7 +11,7 @@ import java.util.Random
 
 class ProjectHistoryTest {
     val fakeRandom = object : Random() {
-        var counter = 'a'
+        var counter = 0
         override fun nextBytes(bytes: ByteArray) {
             bytes[bytes.size - 1] = counter.toByte()
             counter++
@@ -30,8 +30,8 @@ class ProjectHistoryTest {
         assertTrue(history.hasSherdsWithin(timespan))
         assertThat(history.sherds(timespan), equalTo(
             listOf(
-                Sherd(type = POST_TYPE, timestamp = t("2018-08-14T09:00:00Z"), uid = "AAAAAAAAAAAAAABh", history = history),
-                Sherd(type = POST_TYPE, timestamp = t("2018-08-14T10:00:00Z"), uid = "AAAAAAAAAAAAAABi", history = history))
+                Sherd(type = POST_TYPE, timestamp = t("2018-08-14T09:00:00Z"), uid = uid(0)),
+                Sherd(type = POST_TYPE, timestamp = t("2018-08-14T10:00:00Z"), uid = uid(1)))
         ))
     }
     
@@ -43,6 +43,6 @@ class ProjectHistoryTest {
         assertThat(history.sherds(timespan), isEmpty)
     }
     
-    
     fun t(instantStr: String) = Instant.parse(instantStr)
+    fun uid(n: Int) = "AAAAAAAAAAAAAAA${('A' + n)}"
 }

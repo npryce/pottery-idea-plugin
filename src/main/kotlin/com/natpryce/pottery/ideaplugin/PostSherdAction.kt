@@ -15,7 +15,7 @@ class PostSherdAction(
     private val history: ProjectHistory,
     private val clock: Clock = Clock.systemDefaultZone()
 
-) : AnAction("Post", "Post a new sherd", AllIcons.ToolbarDecorator.Add) {
+) : AnAction("Post", "Post a new sherd", AllIcons.General.Balloon) {
     override fun actionPerformed(e: AnActionEvent) {
         val s: String? = Messages.showInputDialog(project, "What happened?", "Post New Sherd", AllIcons.ToolbarDecorator.Add)
         if (s != null) {
