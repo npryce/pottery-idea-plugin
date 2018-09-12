@@ -1,6 +1,7 @@
 <idea-plugin>
     <id>com.natpryce.pottery.pottery-idea-plugin</id>
     <name>Pottery</name>
+    <version>SNAPSHOT</version>
     <vendor email="sw@natpryce.com" url="http://natpryce.com">Nat Pryce</vendor>
 
     <description><![CDATA[
