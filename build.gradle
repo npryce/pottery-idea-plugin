@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.natpryce.pottery'
-version '1.0.0-RC1'
+version project.version
 
 repositories {
     mavenCentral()
