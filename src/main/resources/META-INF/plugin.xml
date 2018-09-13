@@ -2,7 +2,7 @@
     <id>com.natpryce.pottery.pottery-idea-plugin</id>
     <name>Pottery</name>
     <version>SNAPSHOT</version>
-    <vendor email="sw@natpryce.com" url="http://natpryce.com">Nat Pryce</vendor>
+    <vendor email="sw@natpryce.com" url="https://github.com/npryce/pottery-idea-plugin">Nat Pryce</vendor>
 
     <description><![CDATA[
     It's like Twitter, for recording things that happen in your project, stored in it's version control repository.
