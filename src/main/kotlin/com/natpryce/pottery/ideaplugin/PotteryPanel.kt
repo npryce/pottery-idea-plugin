@@ -45,7 +45,8 @@ class PotteryPanel(
     
     private val actions =
         DefaultActionGroup(
-            RecordSherdAction(project, history, clock)
+            RecordSherdAction(project, history, clock),
+            RecordTeamChangeAction(project, history, clock)
         )
     
     private val monthView = JXMonthView().apply {
@@ -122,6 +123,7 @@ class PotteryPanel(
             .map { day -> Date.from(day.atStartOfDay(ZoneId.systemDefault()).toInstant()) }
             .let { monthView.setFlaggedDates(*it.toTypedArray()) }
     }
+    
 }
 
 private fun Date.toLocalDate(): LocalDate =
