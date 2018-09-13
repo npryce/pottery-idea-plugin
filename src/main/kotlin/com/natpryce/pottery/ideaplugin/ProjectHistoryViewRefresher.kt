@@ -1,5 +1,6 @@
 package com.natpryce.pottery.ideaplugin
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileCopyEvent
@@ -11,7 +12,7 @@ import com.natpryce.pottery.ProjectHistory
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class HistoryRefresher(
+class ProjectHistoryViewRefresher(
     private val project: Project,
     private val history: ProjectHistory,
     private val refresh: ()->Unit
@@ -35,7 +36,7 @@ class HistoryRefresher(
     
     private fun refreshIf(refreshFlag: Boolean) {
         if (refreshFlag) {
-            refresh()
+            ApplicationManager.getApplication().invokeLater(refresh)
         }
     }
 }

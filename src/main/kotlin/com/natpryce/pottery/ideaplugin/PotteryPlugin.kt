@@ -19,7 +19,7 @@ class PotteryPlugin : ToolWindowFactory, DumbAware, Disposable {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val history = ProjectHistory(IdeaVfsProjectHistoryStorage(project))
         val potteryPanel = PotteryPanel(project, history, clock)
-        val fileListener = HistoryRefresher(project, history, potteryPanel::refresh)
+        val fileListener = ProjectHistoryViewRefresher(project, history, potteryPanel::refresh)
         
         toolWindow.contentManager.addContent(SERVICE.getInstance().createContent(potteryPanel, "", false))
         

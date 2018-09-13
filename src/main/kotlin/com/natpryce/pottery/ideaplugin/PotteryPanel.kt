@@ -45,7 +45,7 @@ class PotteryPanel(
     
     private val actions =
         DefaultActionGroup(
-            PostSherdAction(project, history, clock)
+            RecordSherdAction(project, history, clock)
         )
     
     private val monthView = JXMonthView().apply {
