@@ -93,7 +93,7 @@ class PotteryPanel(
     private fun showSherds(days: List<Span<Instant>>) {
         sherdsPanel.removeAll()
         days.flatMap { history.sherds(it) }
-            .sortedWith(timeOrder)
+            .sortedWith(timeOrder.reversed())
             .forEachIndexed { i, sherd ->
                 if (i > 0) sherdsPanel.add(Box.createVerticalStrut(8))
                 sherdsPanel.add(sherdPane(sherd))
