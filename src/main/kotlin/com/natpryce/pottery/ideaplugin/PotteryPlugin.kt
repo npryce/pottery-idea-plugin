@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
-import com.intellij.ui.content.ContentFactory.SERVICE
+import com.intellij.ui.content.ContentFactory
 import com.natpryce.pottery.ProjectHistory
 import java.time.Clock
 
@@ -21,7 +21,7 @@ class PotteryPlugin : ToolWindowFactory, DumbAware, Disposable {
         val potteryPanel = PotteryPanel(project, history, clock)
         val fileListener = ProjectHistoryViewRefresher(project, history, potteryPanel::refresh)
         
-        toolWindow.contentManager.addContent(SERVICE.getInstance().createContent(potteryPanel, "", false))
+        toolWindow.contentManager.addContent(ContentFactory.SERVICE.getInstance().createContent(potteryPanel, "", false))
         
         ApplicationManager.getApplication().getMessageBus().connect(this)
             .subscribe(VirtualFileManager.VFS_CHANGES, fileListener)
