@@ -3,10 +3,13 @@ package com.natpryce.pottery.ideaplugin
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionPlaces.TOOLBAR
 import com.intellij.openapi.actionSystem.ActionToolbar
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileTypes.FileTypes.PLAIN_TEXT
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBScrollPane
@@ -35,6 +38,7 @@ import java.time.format.FormatStyle.LONG
 import java.util.Date
 import java.util.SortedSet
 import javax.swing.Box
+import javax.swing.Icon
 import javax.swing.JPanel
 
 class PotteryPanel(
@@ -45,8 +49,8 @@ class PotteryPanel(
     
     private val actions =
         DefaultActionGroup(
-            RecordSherdAction(project, history, clock),
-            RecordTeamChangeAction(project, history, clock)
+            postSherdAction("Record an event", "Record an event", PotteryIcons.PostSherd, ::RecordSherdDialog),
+            postSherdAction("Team changed", "Record a team change", PotteryIcons.TeamChange, ::RecordSherdDialog)
         )
     
     private val monthView = JXMonthView().apply {
@@ -124,6 +128,12 @@ class PotteryPanel(
             .let { monthView.setFlaggedDates(*it.toTypedArray()) }
     }
     
+    fun postSherdAction(text: String, description: String, icon: Icon, createDialog: (Project, ProjectHistory, Clock) -> DialogWrapper) =
+        object : AnAction(text, description, icon) {
+            override fun actionPerformed(e: AnActionEvent) {
+                createDialog(project, history, clock).show()
+            }
+        }
 }
 
 private fun Date.toLocalDate(): LocalDate =
