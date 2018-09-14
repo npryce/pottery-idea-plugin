@@ -16,7 +16,7 @@ class IdeaVfsProjectHistoryStorageTest : ProjectHistoryStorageContract() {
     
     @Rule
     @JvmField
-    val runOnDispatchThread = TestRule { base, description ->
+    val runOnDispatchThread = TestRule { base, _ ->
         object : Statement() {
             override fun evaluate() {
                 fixture.setUp()
