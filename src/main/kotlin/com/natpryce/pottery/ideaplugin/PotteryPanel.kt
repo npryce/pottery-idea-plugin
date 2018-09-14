@@ -14,9 +14,6 @@ import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBScrollPane
-import com.intellij.ui.layout.CCFlags.grow
-import com.intellij.ui.layout.CCFlags.push
-import com.intellij.ui.layout.verticalPanel
 import com.natpryce.pottery.ProjectHistory
 import com.natpryce.pottery.Sherd
 import com.natpryce.pottery.Span
@@ -29,6 +26,7 @@ import org.jdesktop.swingx.calendar.DateSelectionModel.SelectionMode.SINGLE_INTE
 import java.awt.BorderLayout
 import java.awt.BorderLayout.CENTER
 import java.awt.BorderLayout.WEST
+import java.awt.GridBagLayout
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
@@ -40,6 +38,7 @@ import java.util.Date
 import java.util.SortedSet
 import javax.swing.Box
 import javax.swing.Icon
+import javax.swing.JLabel
 import javax.swing.JPanel
 
 class PotteryPanel(
@@ -102,22 +101,36 @@ class PotteryPanel(
         sherdsPanel.removeAll()
         days.flatMap { history.sherds(it) }
             .sortedWith(timeOrder.reversed())
-            .forEachIndexed { i, sherd ->
-                if (i > 0) sherdsPanel.add(Box.createVerticalStrut(8))
-                sherdsPanel.add(sherdPane(sherd))
+            .mapNotNull { sherdPane(it) }
+            .forEachIndexed { i, pane ->
+                if (i > 0) sherdsPanel.add(Box.createVerticalStrut(12))
+                sherdsPanel.add(pane)
             }
         sherdsPanel.revalidate()
         sherdsPanel.repaint()
     }
     
-    private fun sherdPane(sherd: Sherd) = verticalPanel {
+    private fun sherdPane(sherd: Sherd): JPanel? {
         val sherdVirtualFile = project.baseDir.findFileByRelativePath(history.path(sherd).toString())
-        
-        if (sherdVirtualFile != null) {
-            row(DateTimeFormatter.ofLocalizedDateTime(LONG).format(sherd.timestamp.atZone(ZoneId.systemDefault()))) {
-                val document = FileDocumentManager.getInstance().getDocument(sherdVirtualFile)
-                EditorTextField(document, project, PLAIN_TEXT, true, false)(grow, push)
+        return if (sherdVirtualFile != null) {
+            val dateTitle = DateTimeFormatter.ofLocalizedDateTime(LONG).format(sherd.timestamp.atZone(ZoneId.systemDefault()))
+            val document = FileDocumentManager.getInstance().getDocument(sherdVirtualFile)
+
+            JPanel(GridBagLayout()).apply {
+                addToGrid(JLabel(dateTitle)) {
+                    at(0,0)
+                    stretchX()
+                }
+                addToGrid(Box.createVerticalStrut(4)) {
+                    at(0,1)
+                }
+                addToGrid(EditorTextField(document, project, PLAIN_TEXT, true, false)) {
+                    at(0,2)
+                    stretch()
+                }
             }
+        } else {
+            null
         }
     }
     
