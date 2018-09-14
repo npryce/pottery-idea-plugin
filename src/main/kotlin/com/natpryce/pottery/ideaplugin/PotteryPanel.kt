@@ -8,6 +8,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileTypes.FileTypes.PLAIN_TEXT
+import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.EditorTextField
@@ -49,8 +50,10 @@ class PotteryPanel(
     
     private val actions =
         DefaultActionGroup(
-            postSherdAction("Record an event", "Record an event", PotteryIcons.PostSherd, ::RecordSherdDialog),
-            postSherdAction("Team changed", "Record a team change", PotteryIcons.TeamChange, ::RecordSherdDialog)
+            postSherdAction("Note", "Record a note", PotteryIcons.PostSherd,
+                ::RecordNoteDialog),
+            postSherdAction("Team changed", "Record a change of team membership", PotteryIcons.TeamChange,
+                ::RecordTeamChangeDialog)
         )
     
     private val monthView = JXMonthView().apply {
@@ -128,8 +131,13 @@ class PotteryPanel(
             .let { monthView.setFlaggedDates(*it.toTypedArray()) }
     }
     
-    fun postSherdAction(text: String, description: String, icon: Icon, createDialog: (Project, ProjectHistory, Clock) -> DialogWrapper) =
-        object : AnAction(text, description, icon) {
+    fun postSherdAction(
+        text: String,
+        description: String,
+        icon: Icon,
+        createDialog: (Project, ProjectHistory, Clock) -> DialogWrapper
+    ): AnAction =
+        object : AnAction(text, description, icon), DumbAware {
             override fun actionPerformed(e: AnActionEvent) {
                 createDialog(project, history, clock).show()
             }

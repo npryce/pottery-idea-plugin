@@ -22,16 +22,16 @@ class ProjectHistoryTest {
     
     @Test
     fun `record and read back history`() {
-        history.post(t("2018-08-14T09:00:00Z"), POST_TYPE, "some content")
-        history.post(t("2018-08-14T10:00:00Z"), POST_TYPE, "more content")
+        history.post(t("2018-08-14T09:00:00Z"), NOTE_TYPE, "some content")
+        history.post(t("2018-08-14T10:00:00Z"), NOTE_TYPE, "more content")
         
         val timespan = Span(Instant.parse("2018-08-14T00:00:00Z"), Instant.parse("2018-09-14T00:00:00Z"))
         
         assertTrue(history.hasSherdsWithin(timespan))
         assertThat(history.sherds(timespan), equalTo(
             listOf(
-                Sherd(type = POST_TYPE, timestamp = t("2018-08-14T09:00:00Z"), uid = uid(0)),
-                Sherd(type = POST_TYPE, timestamp = t("2018-08-14T10:00:00Z"), uid = uid(1)))
+                Sherd(type = NOTE_TYPE, timestamp = t("2018-08-14T09:00:00Z"), uid = uid(0)),
+                Sherd(type = NOTE_TYPE, timestamp = t("2018-08-14T10:00:00Z"), uid = uid(1)))
         ))
     }
     

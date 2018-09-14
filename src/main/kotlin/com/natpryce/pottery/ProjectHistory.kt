@@ -11,7 +11,8 @@ import java.util.Locale
 import java.util.Random
 
 
-const val POST_TYPE = "post"
+const val NOTE_TYPE = "note"
+const val TEAM_CHANGE_TYPE = "team-change"
 
 data class Sherd(val type: String, val timestamp: Instant, val uid: String)
 
@@ -68,6 +69,13 @@ class ProjectHistory(
         projectHistoryDir().resolve(sherdPath(sherd.timestamp, sherd.type, sherd.uid))
 }
 
+fun ProjectHistory.recordNote(time: Instant, content: String) {
+    post(time, NOTE_TYPE, content)
+}
+
+fun ProjectHistory.recordTeamChange(time: Instant, joiners: List<String>, leavers: List<String>) {
+    post(time, TEAM_CHANGE_TYPE, teamChangeMarkdown(joiners, leavers))
+}
 
 private fun Random.sherdId() =
     ByteArray(12)
@@ -83,3 +91,5 @@ private val dateTimeFormat = timeFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
 private fun sherdPath(time: Instant, type: String, uid: String) =
     "${yearDirectoryFormat.format(time)}/${yearMonthDirectoryFormat.format(time)}/${dateTimeFormat.format(time)}_${type}_${uid}.md"
+
+
