@@ -17,5 +17,11 @@ class SingleTextColumnTableModel(columnName: String) : DefaultTableModel(arrayOf
     }
     
     fun values() =
-        (0..rowCount - 1).map { getValueAt(it, 0).toString() }
+        (0 until rowCount)
+            .map { getValueAt(it, 0).toString() }
+            .filter { it.isNotBlank() }
+    
+    fun isEmpty() =
+        values().isEmpty()
+    
 }

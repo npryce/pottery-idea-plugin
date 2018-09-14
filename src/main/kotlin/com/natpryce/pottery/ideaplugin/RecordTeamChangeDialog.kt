@@ -15,7 +15,7 @@ import javax.swing.DefaultCellEditor
 import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.JTextField
-import javax.swing.table.DefaultTableModel
+import javax.swing.event.TableModelEvent
 import javax.swing.table.TableCellEditor
 
 
@@ -33,16 +33,23 @@ class RecordTeamChangeDialog(
         title = "Record Team Change"
         setOKButtonText("Record")
         init()
+        
+        isOKActionEnabled = false
+        val disableOkActionIfNoInput: (TableModelEvent) -> Unit = {
+            isOKActionEnabled = !(joiners.isEmpty() && leavers.isEmpty())
+        }
+        joiners.addTableModelListener(disableOkActionIfNoInput)
+        leavers.addTableModelListener(disableOkActionIfNoInput)
     }
     
     override fun createCenterPanel(): JComponent {
         return JBSplitter().apply {
-            this.firstComponent = editableList(joiners)
-            this.secondComponent = editableList(leavers)
+            this.firstComponent = editableList("joined", joiners)
+            this.secondComponent = editableList("left", leavers)
         }
     }
     
-    private fun editableList(model: DefaultTableModel): JPanel {
+    private fun editableList(description: String, model: SingleTextColumnTableModel): JPanel {
         val table = object : JBTable(model) {
             override fun prepareEditor(editor: TableCellEditor?, row: Int, column: Int): Component {
                 val field = super.prepareEditor(editor, row, column)
@@ -52,9 +59,10 @@ class RecordTeamChangeDialog(
             }
         }
         table.cellEditor = DefaultCellEditor(JTextField())
+        table.emptyText.text = "Nobody $description"
         return ToolbarDecorator.createDecorator(table)
             .setAddAction {
-                model.addRow(arrayOf("Who?"))
+                model.addRow()
                 table.editCellAt(model.rowCount - 1, 0)
             }
             .createPanel()
