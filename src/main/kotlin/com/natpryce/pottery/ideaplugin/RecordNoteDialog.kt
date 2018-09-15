@@ -3,7 +3,6 @@ package com.natpryce.pottery.ideaplugin
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.DialogWrapper.IdeModalityType.PROJECT
-import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.natpryce.pottery.ProjectHistory
@@ -50,7 +49,6 @@ class RecordNoteDialog(
     
     override fun doOKAction() {
         history.recordNote(clock.instant(), noteText.text)
-        VirtualFileManager.getInstance().asyncRefresh(null)
         super.doOKAction()
     }
 }

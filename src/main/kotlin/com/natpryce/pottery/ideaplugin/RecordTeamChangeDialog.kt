@@ -3,7 +3,6 @@ package com.natpryce.pottery.ideaplugin
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.DialogWrapper.IdeModalityType.PROJECT
-import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.table.JBTable
@@ -70,7 +69,6 @@ class RecordTeamChangeDialog(
     
     override fun doOKAction() {
         history.recordTeamChange(clock.instant(), joiners.values(), leavers.values())
-        VirtualFileManager.getInstance().asyncRefresh(null)
         super.doOKAction()
     }
 }
