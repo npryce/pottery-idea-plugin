@@ -2,6 +2,7 @@ package com.natpryce.pottery.ideaplugin
 
 import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.refreshVfs
 import com.natpryce.pottery.ProjectHistoryStorage
@@ -13,7 +14,7 @@ class IdeaVfsProjectHistoryStorage(
 ) : ProjectHistoryStorage {
     
     override fun readText(path: Path) =
-        project.baseDir.findFileByRelativePath(path.toString())
+        projectDir()?.findFileByRelativePath(path.toString())
             ?.let { VfsUtil.loadText(it) }
     
     override fun writeText(path: Path, content: String) {
@@ -29,15 +30,18 @@ class IdeaVfsProjectHistoryStorage(
     }
     
     override fun list(path: Path): Set<Path> {
-        val baseDir = project.baseDir
-        val basePath = Paths.get(baseDir.path)
+        val baseDir = projectDir()
+        val basePath = Paths.get(project.basePath ?: ".")
         
-        return baseDir.findFileByRelativePath(path.toString())
+        return baseDir?.findFileByRelativePath(path.toString())
             ?.children?.map { basePath.relativize(Paths.get(it.path)) }
             ?.toSortedSet()
             ?: emptySet()
     }
     
     override fun isDir(path: Path) =
-        project.baseDir.findFileByRelativePath(path.toString())?.isDirectory ?: false
+        projectDir()?.findFileByRelativePath(path.toString())?.isDirectory ?: false
+    
+    private fun projectDir() =
+        project.basePath?.let(LocalFileSystem.getInstance()::findFileByPath)
 }

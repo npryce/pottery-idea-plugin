@@ -11,6 +11,7 @@ import com.intellij.openapi.fileTypes.FileTypes.PLAIN_TEXT
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBScrollPane
@@ -82,7 +83,7 @@ class PotteryPanel(
         add(JBSplitter().apply {
             firstComponent = monthView
             secondComponent = JBScrollPane(sherdsPanel)
-            setProportion(0.0f)
+            proportion = 0.0f
         }, CENTER)
         
         refresh()
@@ -111,27 +112,27 @@ class PotteryPanel(
     }
     
     private fun sherdPane(sherd: Sherd): JPanel? {
-        val sherdVirtualFile = project.baseDir.findFileByRelativePath(history.path(sherd).toString())
-        return if (sherdVirtualFile != null) {
-            val dateTitle = DateTimeFormatter.ofLocalizedDateTime(LONG).format(sherd.timestamp.atZone(ZoneId.systemDefault()))
-            val document = FileDocumentManager.getInstance().getDocument(sherdVirtualFile)
-
-            JPanel(GridBagLayout()).apply {
-                addToGrid(JLabel(dateTitle)) {
-                    at(0,0)
-                    stretchX()
-                }
-                addToGrid(Box.createVerticalStrut(4)) {
-                    at(0,1)
-                }
-                addToGrid(EditorTextField(document, project, PLAIN_TEXT, true, false)) {
-                    at(0,2)
-                    stretch()
+        return project.basePath
+            ?.let { LocalFileSystem.getInstance().findFileByPath(it) }
+            ?.findFileByRelativePath(history.path(sherd).toString())
+            ?.let { sherdVirtualFile ->
+                val dateTitle = DateTimeFormatter.ofLocalizedDateTime(LONG).format(sherd.timestamp.atZone(ZoneId.systemDefault()))
+                val document = FileDocumentManager.getInstance().getDocument(sherdVirtualFile)
+                
+                JPanel(GridBagLayout()).apply {
+                    addToGrid(JLabel(dateTitle)) {
+                        at(0, 0)
+                        stretchX()
+                    }
+                    addToGrid(Box.createVerticalStrut(4)) {
+                        at(0, 1)
+                    }
+                    addToGrid(EditorTextField(document, project, PLAIN_TEXT, true, false)) {
+                        at(0, 2)
+                        stretch()
+                    }
                 }
             }
-        } else {
-            null
-        }
     }
     
     private fun highlightDaysWithSherds() {
