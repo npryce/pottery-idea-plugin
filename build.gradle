@@ -6,6 +6,8 @@ plugins {
 group 'com.natpryce.pottery'
 version project.version
 
+ext.intellijVersion = project.properties.get('intellijVersion', 'LATEST-EAP-SNAPSHOT')
+
 repositories {
     mavenCentral()
 }
@@ -26,7 +28,12 @@ compileTestKotlin {
 }
 
 intellij {
-    version '2018.2'
+    version intellijVersion
+}
+
+patchPluginXml {
+    sinceBuild '182'
+    untilBuild '183.*'
 }
 
 publishPlugin {
