@@ -28,8 +28,9 @@ class RecordNoteDialog(
         title = "Record Note"
         setOKButtonText("Record")
         init()
-        noteText.requestFocusInWindow()
     }
+    
+    override fun getPreferredFocusedComponent() = noteText
     
     override fun createCenterPanel(): JComponent {
         return JPanel(GridBagLayout()).apply {
